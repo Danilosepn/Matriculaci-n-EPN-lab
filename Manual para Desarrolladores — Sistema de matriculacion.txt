@@ -1,0 +1,173 @@
+Manual para Desarrolladores — Sistema Integral de Matriculación Vehicular (C)
+
+1. Propósito del sistema
+
+El software implementa un sistema básico de gestión de usuarios y vehículos enfocado en tareas administrativas como el registro, autenticación, obtención de datos vehiculares y cálculos de matrícula. El código está organizado en módulos funcionales independientes que se comunican a través de estructuras de datos y archivos de cabecera. La persistencia de los datos se realiza mediante archivos de texto plano.
+
+2. Estructura del proyecto
+
+El proyecto está compuesto por los siguientes archivos:
+
+Archivos fuente (.c):
+
+main.c → Entrada principal del programa, control del flujo del menú, gestión de vehículos (registro, búsqueda, listado) y carga/guardado principal de datos.
+
+usuarios .c → Manejo de usuarios (registro e inicio de sesión) y funciones de validación de cédula y contraseña, junto con la gestión de su persistencia.
+
+entrada.c → Funciones para la obtención interactiva y validación de los datos del vehículo (placa, edad, avalúo, cilindraje, año de fabricación).
+
+calculos.c → Implementación de funciones para realizar cálculos relacionados con la matrícula del vehículo, como impuestos, SPPAT, rodaje provincial y recargos.
+
+validaciones.c → Implementación de funciones genéricas de validación para nombres, números y el formato de la placa.
+
+Archivos de cabecera (.h):
+
+usuarios.h → Declaraciones de funciones relacionadas con la gestión de usuarios (registrarUsuario, loginUsuario, validarCedula, validarContrasena).
+
+entrada.h → Declaración de la función para obtener datos del vehículo (obtenerDatosVehiculo).
+
+estructuras.h → Definición de la estructura Vehiculo.
+
+calculos.h → Declaraciones de funciones para los cálculos de matrícula y constantes relacionadas.
+
+validaciones.h → Declaraciones de funciones de validación genéricas (esNombreValido, esNumeroValido, esPlacaValida).
+
+Archivos externos utilizados:
+
+vehiculos_matriculados.txt → Base de datos de usuarios y vehículos matriculados. Este archivo se crea y accede en el directorio Documents del perfil del usuario (e.g., C:\Users\SuUsuario\Documents\).
+
+3. Variables globales
+
+El sistema utiliza la siguiente variable global para el usuario actualmente logueado:
+
+char usuarioActual[100]; (definida en main.c)
+
+A diferencia del ejemplo, el sistema no utiliza arreglos globales para Vehiculo o Usuario con límites fijos. La gestión de datos de usuarios y vehículos se realiza leyendo y escribiendo directamente en el archivo vehiculos_matriculados.txt dentro de las funciones correspondientes.
+
+4. Flujo principal del programa
+
+El main() se divide en dos fases principales:
+
+Fase 1: Autenticación
+
+El programa intenta leer los usuarios existentes del archivo vehiculos_matriculados.txt.
+
+Se presenta un menú para que el usuario pueda Iniciar Sesion o Registrar nuevo usuario.
+
+La función loginUsuario() maneja la validación de credenciales. Si el inicio de sesión es exitoso, se guarda el usuarioActual.
+
+Fase 2: Menú principal
+
+Después de una autenticación exitosa, el usuario accede al Menu Principal.
+
+Las opciones incluyen: Registrar un vehiculo nuevo, Buscar vehiculo, Calcular valor de matricula, Listar vehiculos matriculados y Salir.
+
+Al seleccionar Salir, los datos se aseguran de ser guardados (si se realizaron cambios) y el programa finaliza.
+
+5. Validaciones y utilidades
+
+El sistema cuenta con funciones específicas para validar entradas y utilidades generales:
+
+validarCedula(const char *cedula): Valida que una cadena sea una cédula de 10 dígitos numéricos.
+
+validarContrasena(const char *contrasena): Valida la longitud de la contraseña (entre 5 y 20 caracteres).
+
+esPlacaValida(const char* placa): Valida el formato de la placa (tres letras + cuatro dígitos).
+
+esNombreValido(const char* texto): Valida que una cadena contenga solo caracteres alfabéticos.
+
+esNumeroValido(const char* texto): Valida que una cadena contenga solo dígitos numéricos.
+
+limpiarPantalla(): Limpia la consola utilizando system("cls") (para Windows).
+
+while (getchar() != '\n');: Utilizado comúnmente en el código para limpiar el búfer de entrada después de scanf.
+
+6. Persistencia de datos
+
+Tanto los datos de usuarios como los de vehículos se almacenan en un único archivo, vehiculos_matriculados.txt, ubicado en el directorio Documents del perfil del usuario.
+
+Usuarios: Se leen y escriben en el archivo en un formato específico dentro de usuarios .c, con líneas como: Cedula: <cedula>, Contrasena: <contrasena>.
+
+Vehículos: Se registran por usuario y se almacenan en main.c con un formato detallado que incluye:
+Usuario: <usuario_actual>
+Placa: <placa>
+Edad: <edad_propietario>
+Avaluo: <avaluo>
+Cilindraje: <cilindraje>
+Año de fabricacion: <anioFabricacion>
+------------------------------ (separador)
+Las funciones de lectura y escritura (fopen, fgets, sscanf, fprintf, fclose) manejan esta persistencia en main.c y usuarios .c.
+
+7. Gestión de errores
+
+El sistema implementa un manejo básico de errores, incluyendo:
+
+Verificación de apertura de archivos: Se comprueba si fopen() devuelve NULL para manejar casos donde el archivo no existe o no se tienen permisos.
+
+Validación de datos antes de la inserción: Se utilizan funciones de validación (esPlacaValida, validarCedula, etc.) para asegurar la integridad de los datos ingresados por el usuario.
+
+Control de intentos: Para la entrada de datos críticos (como placa, edad, avalúo, etc.) y el inicio de sesión, se limita el número de intentos permitidos al usuario.
+
+Mensajes de error: Se proporcionan mensajes informativos al usuario en caso de entradas inválidas o fallos de operación.
+
+8. Límites definidos
+
+Aunque no hay constantes globales de MAX_VEHICULOS o MAX_USUARIOS que definan límites de arreglos en los headers del código, las siguientes limitaciones son impuestas por las validaciones:
+
+Intentos máximos: INTENTOS_MAX = 3 (definido en entrada.c).
+
+Edad del propietario: Entre 18 y 85 años.
+
+Año de fabricación: Entre 1900 y 2025.
+
+Avalúo del vehículo: Mayor a 0 y menor o igual a 10,000,000 USD.
+
+Cilindraje: Mayor a 0.
+
+Longitud de cédula: 10 dígitos.
+
+Longitud de contraseña: Entre 5 y 20 caracteres.
+
+9. Compilación y ejecución
+
+Se recomienda compilar el programa en un entorno como ZinjaI o cualquier compilador estándar para C (ej. GCC).
+
+Para compilar desde la línea de comandos (GCC):
+
+Asegurarse de que todos los archivos .c estén en el mismo directorio (o especifique la ruta correcta para usuarios .c si el espacio en el nombre causa problemas).
+
+Evitar redefiniciones duplicadas (como se detalla en el Log de Errores).
+
+Ejecutar el siguiente comando:
+gcc main.c "usuarios .c" entrada.c calculos.c validaciones.c -o sistema
+(Nota: Se usan comillas para usuarios .c debido al espacio en el nombre del archivo).
+
+Para ejecutar:
+
+Simplemente ejecute el archivo sistema (o el nombre que le haya dado al ejecutable) desde la terminal.
+
+10. Recomendaciones de mantenimiento
+
+Headers sincronizados: Mantener los archivos de cabecera (.h) sincronizados con las implementaciones de sus respectivas funciones en los archivos .c para evitar errores de declaración implícita o referencia indefinida.
+
+Validar cambios en estructuras: Cualquier modificación a la estructura Vehiculo en estructuras.h debe ser reflejada y probada en todas las funciones que leen o escriben en vehiculos_matriculados.txt, así como en las funciones que operan con dicha estructura.
+
+Documentar nuevas funciones: Al agregar nuevas funcionalidades, es crucial documentar su propósito, parámetros y valor de retorno.
+
+Separar módulos: Continuar con la práctica de separar las responsabilidades en módulos lógicos para mantener el código organizado y fácil de depurar.
+
+11. Extensión del sistema
+
+El código está diseñado para permitir extensiones futuras, tales como:
+
+Cifrado de contraseñas: Implementar algoritmos de hash para almacenar contraseñas de forma más segura.
+
+Interfaz gráfica de usuario (GUI): Integrar con bibliotecas externas como GTK o Qt para una interfaz más amigable.
+
+Persistencia en base de datos: Migrar el almacenamiento de datos de archivos de texto a una base de datos relacional (ej. SQLite) para mejorar la escalabilidad y el rendimiento.
+
+Exportación de datos: Añadir funcionalidades para exportar los datos de vehículos o usuarios en otros formatos (ej. CSV, JSON).
+
+12. Autoría
+
+Sistema desarrollado por Danilo Unapucha y Henry Luisa. Diseñado para cumplir criterios de modularidad, seguridad de datos (básica) y validación técnica en lenguaje C.

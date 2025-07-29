@@ -1,0 +1,160 @@
+Log de errores general — Sistema de Matriculación Vehicular (C)
+
+Este documento recopila los errores más comunes que pueden ocurrir durante el desarrollo, compilación y ejecución del proyecto. Sirve como guía de depuración y prevención para mantener la estabilidad y calidad del código fuente.
+
+1. Errores de compilación
+
+Error: Declaración implícita de funciones
+
+Mensaje: error: implicit declaration of function ‘limpiarPantalla’ (ocurre en usuarios .c) o error: implicit declaration of function ‘esPlacaValida’ (podría ocurrir en entrada.c si validaciones.h no se incluye).
+
+Causa: No se incluyó el archivo .h que contiene la declaración de la función utilizada.
+
+Solución: Verificar que se haya incluido correctamente el archivo de cabecera correspondiente en el archivo fuente:
+
+#include "usuarios.h" para funciones como limpiarPantalla, validarCedula, validarContrasena, cedulaExiste, registrarUsuario, loginUsuario.
+
+#include "validaciones.h" para funciones como esNombreValido, esNumeroValido, esPlacaValida.
+
+#include "entrada.h" para obtenerDatosVehiculo.
+
+#include "estructuras.h" para la definición de Vehiculo.
+
+#include "calculos.h" para funciones de cálculo.
+
+Error: Referencia indefinida
+
+Mensaje: undefined reference to ‘loginUsuario’ (ocurre si usuarios .c no se compila con main.c).
+
+Causa: La función está declarada en un archivo .h pero no implementada en ningún archivo .c, o el archivo .c que la implementa no está compilado junto al resto.
+
+Solución: Asegurar que todos los archivos fuente (main.c, usuarios .c, entrada.c, calculos.c, validaciones.c) estén incluidos en el proyecto y compilados correctamente. Por ejemplo, para GCC:
+gcc main.c usuarios\ .c entrada.c calculos.c validaciones.c -o sistema
+
+Error: Redefinición de estructura
+
+Mensaje: redefinition of 'Vehiculo' (si estructuras.h se incluye incorrectamente o la estructura se define en otro lugar).
+
+Causa: La estructura Vehiculo fue definida en más de un archivo de cabecera sin protección contra múltiples inclusiones.
+
+Solución: Usar las directivas de preprocesador adecuadas en estructuras.h y en cualquier otro .h que defina estructuras:
+
+Error: Incompatibilidad de tipos
+
+Mensaje: incompatible types when assigning to type 'int' from 'char *' (o float a int, etc.). Por ejemplo, si se intenta asignar directamente el resultado de scanf a una cadena, o si los tipos de scanf/printf no coinciden con las variables.
+
+Causa: Asignación incorrecta entre tipos no compatibles (ej. cadena a entero, o uso de %d con una variable float).
+
+Solución: Asegurar que los tipos de datos coincidan con las variables declaradas y que los especificadores de formato en scanf, sscanf, printf (%d, %f, %s, etc.) correspondan al tipo de la variable.
+
+2. Errores de enlace entre módulos
+
+Error: Variables globales no definidas
+
+Mensaje: error: ‘usuarioActual’ undeclared here (not in a function) (si usuarioActual se intentara usar en otro .c sin la declaración extern y la inclusión adecuada).
+
+Causa: Una variable global se usa en un archivo, pero su declaración extern o su definición en el archivo fuente correspondiente no es visible o no fue compilada.
+
+Solución: Para variables globales como usuarioActual, asegurarse de que solo se defina una vez (en main.c) y se declare con extern en un .h si otros archivos necesitan acceder a ella (aunque en su código usuarioActual solo se usa directamente en main.c).
+
+Error: Definición duplicada
+
+Mensaje: error: multiple definition of 'validarCedula' (si validarCedula se implementara en más de un .c o se definiera en un .h).
+
+Causa: Se define la misma función o variable global en más de un archivo .c sin usar extern para las variables globales, o una implementación de función se incluye directamente en un archivo .h.
+
+Solución: Asegurar que las funciones (como validarCedula) solo tengan una implementación en un único archivo .c y que los archivos .h (como usuarios.h) solo contengan sus declaraciones.
+
+3. Errores en tiempo de ejecución
+
+Error: Archivo no existe o no accesible
+
+Mensaje: No se encontro el archivo de usuarios. o Error al guardar el archivo.
+
+Causa: El archivo vehiculos_matriculados.txt no está creado, tiene una ruta incorrecta (la función getenv("USERPROFILE") puede comportarse diferente en distintos sistemas, o el directorio Documents no existe), o el programa no tiene permisos suficientes para leer/escribir.
+
+Solución:
+
+Verificar que la ruta completa generada (%USERPROFILE%\Documents\vehiculos_matriculados.txt) sea correcta y exista.
+
+Asegurarse de que el programa tenga permisos de lectura y escritura en esa ubicación.
+
+Considerar crear el archivo vehiculos_matriculados.txt vacío manualmente si no existe para la primera ejecución.
+
+Error: Datos corruptos en archivo
+
+Mensaje: sscanf no logra parsear las líneas correctamente, o los datos leídos son incorrectos.
+
+Causa: El formato de los datos en vehiculos_matriculados.txt no coincide con el formato esperado por sscanf (ej. un campo falta, el orden es incorrecto, o hay caracteres inesperados).
+
+Solución: Revisar que el formato de escritura (fprintf) y lectura (sscanf) del archivo sea idéntico y consistente. Por ejemplo, en main.c se escribe:
+"Usuario: %s\nPlaca: %s\nEdad: %d\nAvaluo: %.2f\nCilindraje: %.1f\nA%co de fabricacion: %d\n------------------------------\n"
+Y en usuarios .c se lee:
+"Cedula: %[^,], Contrasena: %[^\n]"
+Asegúrese de que el formato de sscanf al leer vehículos en main.c también coincida con el de escritura.
+
+Error: Entrada incorrecta del usuario
+
+Mensaje: Comportamiento errático del menú o lectura incorrecta de valores numéricos después de scanf.
+
+Causa: El usuario ingresa caracteres no numéricos donde se espera un número (scanf("%d", ...), scanf("%f", ...)), dejando un "residuo" en el búfer de entrada que interfiere con lecturas posteriores.
+
+Solución: Siempre limpiar el búfer de entrada después de cada scanf que no sea para cadenas completas, usando while (getchar() != '\n');.
+
+Error: Acceso fuera de límites (posible)
+
+Mensaje: Puede causar fallos inesperados del programa (segmentation fault) o corrupción de datos.
+
+Causa: Acceder a un índice más allá del tamaño declarado de un arreglo de caracteres (ej. char buffer[50] si se lee una cadena de más de 49 caracteres más el nulo terminador, o linea[200] si una línea del archivo es más larga).
+
+Solución:
+
+Asegurar que los búferes de caracteres (placaBuscada, linea, buffer) tengan un tamaño suficiente para la entrada esperada.
+
+Al leer cadenas con scanf, usar un especificador de ancho para evitar desbordamientos (ej. scanf("%49s", buffer);).
+
+Al usar fgets, asegurarse de que el tamaño del búfer es el correcto: fgets(linea, sizeof(linea), archivo).
+
+4. Advertencias comunes del compilador
+
+Advertencia: unused variable
+
+Explicación: Una variable fue declarada pero nunca utilizada en el código, por ejemplo, char buffer[50]; en entrada.c después de ser usada para placa, pero antes de ser reutilizada para otros campos.
+
+Acción: Eliminar la variable si no es necesaria, o asegurarse de que se use para algún propósito.
+
+Advertencia: comparison between signed and unsigned
+
+Explicación: Comparación entre un tipo con signo (int) y uno sin signo (unsigned int o size_t), lo que puede llevar a resultados inesperados en ciertos rangos de valores.
+
+Acción: Usar casting explícito para asegurar que ambos lados de la comparación tengan el mismo tipo, o declarar las variables con el tipo apropiado (size_t para tamaños y conteos si son siempre positivos).
+
+Advertencia: control reaches end of non-void function
+
+Explicación: Una función que está declarada para devolver un valor (no void) llega al final de su ejecución sin una instrucción return. Por ejemplo, si en validarCedula o validarContrasena faltara un return en algún camino.
+
+Acción: Asegurar que todas las rutas de ejecución de una función que devuelve un valor terminen con un return apropiado.
+
+Advertencia: format ‘%d’ expects argument of type ‘int’, but argument ...
+
+Explicación: El especificador de formato en printf o scanf (ej. %d para entero) no coincide con el tipo de la variable pasada como argumento. Esto ocurre en main.c al imprimir la 'ñ' usando 164.
+
+Acción: Revisar que los tipos de los argumentos coincidan con los especificadores de formato utilizados. Para la 'ñ', el uso de %c o el valor directo 164 es una solución común en C para caracteres ASCII extendidos en sistemas Windows.
+
+5. Errores al manejar archivos
+
+Error: Error en apertura del archivo
+
+Mensaje: Error al guardar el archivo. o No se encontro el archivo de usuarios.. fopen() devuelve NULL.
+
+Causa: El sistema operativo deniega el acceso al archivo, la ruta es incorrecta, o el directorio Documents no existe o no es accesible.
+
+Solución: Confirmar que el archivo o su directorio existe y que el programa tiene los permisos necesarios. Verificar la ruta construida con sprintf(ruta, "%s\\\\Documents\\\\vehiculos_matriculados.txt", carpeta);.
+
+Error: Escritura incompleta o corrupción de datos
+
+Mensaje: El archivo vehiculos_matriculados.txt solo contiene una parte de los datos esperados, o los datos están desordenados.
+
+Causa: Un error en el bucle de escritura, el formato en fprintf no es consistente, o fclose no se llama correctamente.
+
+Solución: Revisar la lógica de los bucles de lectura y escritura para asegurar que se procesen todos los datos. Asegurarse de que fprintf escribe todos los campos esperados con el formato correcto y que fclose(archivo) se llama siempre para asegurar que los datos se vacíen del búfer a disco.

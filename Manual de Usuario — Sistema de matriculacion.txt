@@ -1,0 +1,108 @@
+Manual de Usuario — Sistema Integral de Matriculación Vehicular (C)
+
+1. Introducción
+
+Este software permite la gestión básica de usuarios y vehículos para fines de matriculación. Está diseñado para ofrecer funcionalidades simples y claras para registrar información vehicular, buscar vehículos existentes, calcular el valor de la matrícula y listar los vehículos registrados.
+
+2. Requisitos del sistema
+
+Sistema operativo: Windows o Linux.
+
+Compilador: Requiere un entorno de desarrollo compatible con C (ej. ZinjaI o GCC).
+
+Acceso a archivos locales: El programa requiere acceso de lectura y escritura al archivo vehiculos_matriculados.txt, que se almacenará en el directorio Documents de su perfil de usuario (ej. C:\Users\SuUsuario\Documents\).
+
+3. Archivos del sistema
+
+vehiculos_matriculados.txt: Este archivo de texto plano es la "base de datos" del sistema. Contiene los datos de los usuarios registrados (cédula y contraseña) y, asociados a cada usuario, los detalles de los vehículos que han matriculado.
+
+Ejecutable del programa: El archivo compilado (por ejemplo, sistema.exe en Windows o sistema en Linux) que se genera a partir de los archivos fuente en lenguaje C.
+
+4. Estructura del menú principal
+
+Al iniciar el programa, se le presentará el menú de autenticación:
+
+===== AUTENTICACION =====
+1. Iniciar Sesion
+2. Registrar nuevo usuario
+3. Salir
+Seleccione una opcion:
+Una vez que inicie sesión exitosamente, accederá al menú principal:
+
+===== MENU PRINCIPAL =====
+1. Registrar un vehiculo nuevo
+2. Buscar vehiculo
+3. Calcular valor de matricula
+4. Listar vehiculos matriculados
+5. Salir
+Seleccione una opcion:
+5. Uso del sistema
+
+5.1. Inicio de sesión
+Se le pedirá su número de cédula y contraseña. Debe ingresar credenciales de un usuario previamente registrado. Tendrá 3 intentos para iniciar sesión. Si excede los intentos, el programa le permitirá registrar un nuevo usuario.
+
+5.2. Registro de usuario
+Para crear un nuevo usuario, se le solicitará un número de cédula (debe ser un número válido de 10 dígitos) y una contraseña (entre 5 y 20 caracteres). El sistema validará la cédula y la contraseña, y no permitirá registrar una cédula que ya exista.
+
+5.3. Registro de un vehículo nuevo
+Una vez iniciada la sesión, podrá registrar un vehículo asociado a su usuario. Se le solicitarán los siguientes datos, y el sistema realizará validaciones automáticas:
+
+Placa del vehículo: Formato de tres letras seguidas de cuatro dígitos (ej. PBA1234).
+
+Edad del propietario: La edad de la persona que registra el vehículo (entre 18 y 85 años).
+
+Avalúo del vehículo: El valor comercial del vehículo (debe ser un número positivo y menor o igual a 10,000,000 USD).
+
+Cilindraje: El cilindraje del motor del vehículo (debe ser un número positivo).
+
+Año de fabricación: El año en que se fabricó el vehículo (entre 1900 y 2025).
+
+Revisiones técnicas: El sistema le preguntará si ha aprobado las tres revisiones técnicas. Es necesario haberlas aprobado para poder registrar el vehículo.
+
+5.4. Búsqueda de vehículo
+Se le solicitará la placa del vehículo que desea buscar. Si el vehículo existe y está asociado a su usuario, el sistema mostrará toda su información detallada.
+
+5.5. Calcular valor de matrícula
+Esta opción le permite calcular los costos asociados a la matrícula de un vehículo. Deberá ingresar la placa del vehículo para el cual desea realizar el cálculo. El sistema mostrará un desglose de impuestos, SPPAT, rodaje provincial y recargos si aplica.
+
+5.6. Listar vehículos matriculados
+Esta opción mostrará en pantalla un listado de todos los vehículos que usted ha registrado en el sistema.
+
+5.7. Salir
+Al seleccionar esta opción, el programa guardará automáticamente los últimos cambios realizados en los datos de vehículos y usuarios en el archivo vehiculos_matriculados.txt y luego finalizará.
+
+6. Validaciones automáticas
+
+El sistema realiza las siguientes validaciones para asegurar la integridad de los datos:
+
+Verifica el formato correcto de placas (3 letras + 4 dígitos).
+
+Valida la cédula (10 dígitos numéricos).
+
+Valida la longitud de la contraseña (entre 5 y 20 caracteres).
+
+Verifica que los valores numéricos (edad, avalúo, cilindraje, año) estén dentro de rangos lógicos y aceptables.
+
+No permite registrar un usuario con una cédula ya existente.
+
+No permite registrar un vehículo con una placa que ya esté asociada al usuario.
+
+7. Recomendaciones de uso
+
+Guardar siempre: Siempre salga del programa utilizando la opción "5. Salir" del menú principal para asegurar que todos los cambios se guarden correctamente en el archivo.
+
+No editar archivos a mano: Evite modificar el archivo vehiculos_matriculados.txt manualmente, ya que esto podría corromper los datos y hacer que el programa no pueda leerlos correctamente.
+
+Permisos de archivo: Asegúrese de que el programa tenga los permisos necesarios para leer y escribir en el directorio Documents de su usuario.
+
+8. Manejo de errores
+
+Si el archivo vehiculos_matriculados.txt no se encuentra al iniciar, el programa intentará crearlo automáticamente.
+
+Si ingresa datos inválidos (ej. texto donde se espera un número, o un formato de placa incorrecto), el programa le informará del error y le dará la oportunidad de reintentar la entrada.
+
+El programa tiene un límite de 3 intentos para ingresar datos válidos en ciertas situaciones (como la placa, edad, avalúo, etc.).
+
+9. Créditos
+
+Sistema desarrollado por Danilo Unapucha y Henry Luisa, como parte de un proyecto en lenguaje C enfocado en la modularidad, las validaciones y la gestión básica de datos persistentes.
